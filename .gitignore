@@ -1,0 +1,45 @@
+# Rust
+target/
+**/*.rs.bk
+
+# TypeScript / Node
+node_modules/
+dist/
+*.js.map
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+*.egg
+.venv/
+venv/
+
+# Data
+data/
+*.duckdb
+*.duckdb.wal
+
+# Environment
+.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Experiment results (regenerable)
+experiments/results/
+
+# Docker volumes
+infra/neo4j/data/
+infra/eventstore/data/
+infra/redis/data/
