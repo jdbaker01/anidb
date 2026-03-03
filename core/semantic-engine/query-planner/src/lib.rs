@@ -1,3 +1,5 @@
-// Query planner: translates parsed intent into storage operations.
-// Produces Cypher queries, EventStoreDB reads, DuckDB SQL, and confidence lookups.
-// Implemented in Phase 4.
+pub mod planner;
+pub mod types;
+
+pub use planner::{build_query_plan, PlanError};
+pub use types::*;

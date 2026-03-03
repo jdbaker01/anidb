@@ -27,3 +27,5 @@ thiserror = { workspace = true }
 anyhow = { workspace = true }
 dotenvy = { workspace = true }
 reqwest = { workspace = true }
+anidb-knowledge-graph = { workspace = true }
+neo4rs = { workspace = true }

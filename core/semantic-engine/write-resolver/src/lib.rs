@@ -1,3 +1,5 @@
-// Write resolver: resolves semantic write declarations into typed events.
-// Validates semantic consistency against the ontology before writes.
-// Implemented in Phase 4.
+pub mod resolver;
+pub mod types;
+
+pub use resolver::{resolve_write, ResolveError};
+pub use types::*;

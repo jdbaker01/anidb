@@ -1,3 +1,7 @@
-// Semantic engine: intent parsing, query planning, write resolution, context bundling.
-// This crate re-exports sub-crate functionality and exposes the HTTP service.
-// Implemented in Phase 4.
+pub mod anthropic;
+pub mod clients;
+pub mod config;
+pub mod error;
+pub mod handlers;
+pub mod pipeline;
+pub mod state;
