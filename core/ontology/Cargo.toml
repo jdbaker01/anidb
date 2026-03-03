@@ -10,6 +10,7 @@ path = "src/main.rs"
 
 [dependencies]
 anidb-shared-types = { workspace = true }
+anidb-knowledge-graph = { workspace = true }
 tokio = { workspace = true }
 axum = { workspace = true }
 tower-http = { workspace = true }

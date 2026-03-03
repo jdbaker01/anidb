@@ -98,6 +98,7 @@ version = "0.1.0"
 dependencies = [
  "anidb-shared-types",
  "anyhow",
+ "chrono",
  "neo4rs",
  "serde",
  "serde_json",
@@ -111,6 +112,7 @@ dependencies = [
 name = "anidb-ontology"
 version = "0.1.0"
 dependencies = [
+ "anidb-knowledge-graph",
  "anidb-shared-types",
  "anyhow",
  "axum 0.8.8",
