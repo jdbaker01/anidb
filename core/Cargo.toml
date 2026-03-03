@@ -1,0 +1,66 @@
+[workspace]
+resolver = "2"
+members = [
+    "shared-types",
+    "event-log",
+    "confidence-store",
+    "subscription-engine",
+    "semantic-engine",
+    "semantic-engine/intent-parser",
+    "semantic-engine/query-planner",
+    "semantic-engine/write-resolver",
+    "semantic-engine/context-bundler",
+    "ontology",
+    "knowledge-graph",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+repository = "https://github.com/jdbaker01/anidb"
+
+[workspace.dependencies]
+# Async runtime
+tokio = { version = "1", features = ["full"] }
+
+# Web framework
+axum = "0.8"
+tower = "0.5"
+tower-http = { version = "0.6", features = ["cors", "trace"] }
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Database clients
+eventstore = "3"
+sqlx = { version = "0.8", features = ["runtime-tokio", "tls-rustls", "postgres", "uuid", "chrono", "json"] }
+neo4rs = "0.8"
+duckdb = { version = "1", features = ["bundled"] }
+redis = { version = "0.27", features = ["tokio-comp"] }
+
+# HTTP client
+reqwest = { version = "0.12", features = ["json"] }
+
+# Utilities
+uuid = { version = "1", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+thiserror = "2"
+anyhow = "1"
+dotenvy = "0.15"
+
+# Internal crates
+anidb-shared-types = { path = "shared-types" }
+anidb-event-log = { path = "event-log" }
+anidb-confidence-store = { path = "confidence-store" }
+anidb-subscription-engine = { path = "subscription-engine" }
+anidb-semantic-engine = { path = "semantic-engine" }
+anidb-intent-parser = { path = "semantic-engine/intent-parser" }
+anidb-query-planner = { path = "semantic-engine/query-planner" }
+anidb-write-resolver = { path = "semantic-engine/write-resolver" }
+anidb-context-bundler = { path = "semantic-engine/context-bundler" }
+anidb-ontology = { path = "ontology" }
+anidb-knowledge-graph = { path = "knowledge-graph" }
