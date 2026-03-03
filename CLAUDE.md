@@ -86,8 +86,11 @@ anidb/
 | API Gateway | 3000 | Main agent entry point |
 | Semantic Engine | 8001 | Internal; called by API gateway |
 | Ontology Service | 8002 | Internal; manages ontology lifecycle |
+| Confidence Store | 8003 | Internal; fact provenance & confidence |
+| Event Log | 8010 | Internal; append-only event store |
 | Knowledge Graph (Neo4j) | 7474 / 7687 | Browser UI at 7474 |
 | EventStoreDB | 2113 / 1113 | Admin UI at 2113 |
+| PostgreSQL | 5432 | Confidence Store backing database |
 | DuckDB | — | In-process; no separate port |
 | Redis | 6379 | Subscription engine backing store |
 

@@ -1,2 +1,5 @@
-// Confidence & provenance metadata store.
-// Implemented in Phase 2.
+pub mod config;
+pub mod db;
+pub mod error;
+pub mod handlers;
+pub mod models;
