@@ -1,0 +1,29 @@
+[package]
+name = "anidb-semantic-engine"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "anidb-semantic-engine"
+path = "src/main.rs"
+
+[dependencies]
+anidb-shared-types = { workspace = true }
+anidb-intent-parser = { workspace = true }
+anidb-query-planner = { workspace = true }
+anidb-write-resolver = { workspace = true }
+anidb-context-bundler = { workspace = true }
+tokio = { workspace = true }
+axum = { workspace = true }
+tower-http = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+dotenvy = { workspace = true }
+reqwest = { workspace = true }
