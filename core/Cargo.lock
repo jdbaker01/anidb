@@ -51,12 +51,14 @@ name = "anidb-context-bundler"
 version = "0.1.0"
 dependencies = [
  "anidb-shared-types",
+ "chrono",
  "reqwest 0.12.28",
  "serde",
  "serde_json",
  "thiserror 2.0.18",
  "tokio",
  "tracing",
+ "uuid",
 ]
 
 [[package]]
@@ -84,12 +86,14 @@ name = "anidb-intent-parser"
 version = "0.1.0"
 dependencies = [
  "anidb-shared-types",
+ "chrono",
  "reqwest 0.12.28",
  "serde",
  "serde_json",
  "thiserror 2.0.18",
  "tokio",
  "tracing",
+ "uuid",
 ]
 
 [[package]]
@@ -134,11 +138,13 @@ dependencies = [
 name = "anidb-query-planner"
 version = "0.1.0"
 dependencies = [
+ "anidb-intent-parser",
  "anidb-shared-types",
  "serde",
  "serde_json",
  "thiserror 2.0.18",
  "tracing",
+ "uuid",
 ]
 
 [[package]]
@@ -147,6 +153,7 @@ version = "0.1.0"
 dependencies = [
  "anidb-context-bundler",
  "anidb-intent-parser",
+ "anidb-knowledge-graph",
  "anidb-query-planner",
  "anidb-shared-types",
  "anidb-write-resolver",
@@ -154,6 +161,7 @@ dependencies = [
  "axum 0.8.8",
  "chrono",
  "dotenvy",
+ "neo4rs",
  "reqwest 0.12.28",
  "serde",
  "serde_json",
@@ -201,10 +209,12 @@ name = "anidb-write-resolver"
 version = "0.1.0"
 dependencies = [
  "anidb-shared-types",
+ "chrono",
  "serde",
  "serde_json",
  "thiserror 2.0.18",
  "tracing",
+ "uuid",
 ]
 
 [[package]]
