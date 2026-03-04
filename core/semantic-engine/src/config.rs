@@ -78,7 +78,7 @@ impl Config {
                 .unwrap_or_else(|_| "claude-sonnet-4-6".to_string()),
             openai_api_key,
             openai_model: std::env::var("OPENAI_MODEL")
-                .unwrap_or_else(|_| "gpt-4o".to_string()),
+                .unwrap_or_else(|_| "gpt-5.1".to_string()),
             event_log_url: std::env::var("EVENT_LOG_URL")
                 .unwrap_or_else(|_| "http://localhost:8010".to_string()),
             confidence_store_url: std::env::var("CONFIDENCE_STORE_URL")
