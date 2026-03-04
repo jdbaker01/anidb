@@ -2,13 +2,13 @@
 
 use anidb_knowledge_graph::GraphClient;
 
-use crate::anthropic::AnthropicClient;
 use crate::clients::{ConfidenceStoreClient, EventLogClient};
+use crate::llm::LlmBackend;
 
 /// All service clients bundled together. Wrapped in `Arc` by the Axum router.
 #[derive(Clone)]
 pub struct AppState {
-    pub anthropic: AnthropicClient,
+    pub llm: LlmBackend,
     pub event_log: EventLogClient,
     pub confidence_store: ConfidenceStoreClient,
     pub graph: GraphClient,

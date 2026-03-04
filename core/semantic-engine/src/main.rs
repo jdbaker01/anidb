@@ -8,10 +8,12 @@ mod clients;
 mod config;
 mod error;
 mod handlers;
+mod llm;
+mod openai;
 mod pipeline;
 mod state;
 
-use std::sync::Arc;
+use std::sync::Arc;  // used for the Axum shared state
 
 use anyhow::Result;
 use axum::routing::{get, post};
@@ -24,7 +26,9 @@ use anidb_knowledge_graph::GraphClient;
 
 use crate::anthropic::AnthropicClient;
 use crate::clients::{ConfidenceStoreClient, EventLogClient};
-use crate::config::Config;
+use crate::config::{Config, LlmProvider};
+use crate::llm::LlmBackend;
+use crate::openai::OpenAIClient;
 use crate::state::AppState;
 
 #[tokio::main]
@@ -38,14 +42,21 @@ async fn main() -> Result<()> {
 
     let config = Config::from_env()?;
 
-    // Initialize the Anthropic API client
-    let anthropic_client = AnthropicClient::new(
-        config.anthropic_api_key.clone(),
-        config.anthropic_model.clone(),
-    );
-    tracing::info!(model = %config.anthropic_model, "Anthropic client initialized");
+    // Initialise the LLM backend based on LLM_PROVIDER
+    let llm = match config.llm_provider {
+        LlmProvider::Anthropic => {
+            let api_key = config.anthropic_api_key.clone().unwrap(); // validated in Config::from_env
+            tracing::info!(model = %config.anthropic_model, "LLM provider: Anthropic");
+            LlmBackend::Anthropic(AnthropicClient::new(api_key, config.anthropic_model.clone()))
+        }
+        LlmProvider::OpenAI => {
+            let api_key = config.openai_api_key.clone().unwrap(); // validated in Config::from_env
+            tracing::info!(model = %config.openai_model, "LLM provider: OpenAI");
+            LlmBackend::OpenAI(OpenAIClient::new(api_key, config.openai_model.clone()))
+        }
+    };
 
-    // Initialize service clients
+    // Initialise service clients
     let event_log = EventLogClient::new(config.event_log_url.clone());
     tracing::info!(url = %config.event_log_url, "Event Log client initialized");
 
@@ -59,7 +70,7 @@ async fn main() -> Result<()> {
 
     // Build shared state
     let state = Arc::new(AppState {
-        anthropic: anthropic_client,
+        llm,
         event_log,
         confidence_store,
         graph,

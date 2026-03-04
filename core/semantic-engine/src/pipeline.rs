@@ -12,8 +12,8 @@ use anidb_knowledge_graph::queries as graph_queries;
 use anidb_query_planner::{build_query_plan, ConfidenceQueryType, EventLogQueryType, GraphQueryType};
 use anidb_shared_types::intent::{ContextBundle, IntentQuery};
 
-use crate::anthropic::{Message, MessageContent, MessageRequest, ToolChoice, ToolDef};
 use crate::error::SemanticEngineError;
+use crate::llm::{LlmMessage, LlmRequest, LlmTool};
 use crate::state::AppState;
 
 /// Execute the full intent-read pipeline.
@@ -27,29 +27,23 @@ pub async fn process_intent_read(
     tracing::info!(intent = %query.intent, "Phase 1: Parsing intent");
 
     let parsed = parse_intent(&query, |system, user_msg, tool_schema| {
-        let client = state.anthropic.clone();
+        let llm = state.llm.clone();
         async move {
-            let request = MessageRequest {
-                model: client.model().to_string(),
-                max_tokens: 1024,
+            let req = LlmRequest {
                 system: Some(system),
-                messages: vec![Message {
+                messages: vec![LlmMessage {
                     role: "user".to_string(),
-                    content: MessageContent::Text(user_msg),
+                    content: user_msg,
                 }],
-                tools: Some(vec![ToolDef {
+                max_tokens: 1024,
+                tool: Some(LlmTool {
                     name: "parse_intent".to_string(),
                     description: "Parse the agent's intent into structured query parameters"
                         .to_string(),
                     input_schema: tool_schema,
-                }]),
-                tool_choice: Some(ToolChoice {
-                    choice_type: "tool".to_string(),
-                    name: "parse_intent".to_string(),
                 }),
             };
-            client
-                .send_structured::<serde_json::Value>(request)
+            llm.send_structured::<serde_json::Value>(req)
                 .await
                 .map_err(|e| e.to_string())
         }
@@ -89,20 +83,18 @@ pub async fn process_intent_read(
         &plan.decision_class,
         &results,
         |system, user_msg| {
-            let client = state.anthropic.clone();
+            let llm = state.llm.clone();
             async move {
-                let request = MessageRequest {
-                    model: client.model().to_string(),
-                    max_tokens: 2048,
+                let req = LlmRequest {
                     system: Some(system),
-                    messages: vec![Message {
+                    messages: vec![LlmMessage {
                         role: "user".to_string(),
-                        content: MessageContent::Text(user_msg),
+                        content: user_msg,
                     }],
-                    tools: None,
-                    tool_choice: None,
+                    max_tokens: 2048,
+                    tool: None,
                 };
-                client.send_text(request).await.map_err(|e| e.to_string())
+                llm.send_text(req).await.map_err(|e| e.to_string())
             }
         },
     )
@@ -268,26 +260,18 @@ async fn execute_query_plan(
 // ============================================================================
 
 /// Extract customer context from a get_customer_context() query result.
-///
-/// The query returns: c (Customer node), p (Plan node), features, tickets, invoices
-/// as collected lists. We extract what we can into a flat JSON object.
 fn extract_customer_context_json(row: &neo4rs::Row) -> serde_json::Value {
     let mut map = serde_json::Map::new();
 
-    // Try to extract the customer node as a neo4rs::Node
     if let Ok(node) = row.get::<neo4rs::Node>("c") {
         extract_node_properties(&node, &mut map, "customer");
     }
 
-    // Try to extract the plan node
     if let Ok(node) = row.get::<neo4rs::Node>("p") {
         extract_node_properties(&node, &mut map, "plan");
     }
 
-    // Features, tickets, invoices come as collected lists — extract as JSON
     for list_key in &["features", "tickets", "invoices"] {
-        // These are collected as list of maps in Cypher
-        // neo4rs may return them as BoltList; try to get as a generic value
         if let Ok(val) = row.get::<Vec<serde_json::Value>>(list_key) {
             map.insert(list_key.to_string(), serde_json::json!(val));
         }
@@ -319,7 +303,6 @@ fn extract_node_properties(
         format!("{}_", prefix)
     };
 
-    // String properties
     for key in &[
         "customer_id",
         "status",
@@ -333,7 +316,6 @@ fn extract_node_properties(
         }
     }
 
-    // Integer properties
     for key in &["mrr_cents", "seat_count", "price_cents", "amount_cents", "login_count"] {
         if let Ok(v) = node.get::<i64>(key) {
             map.insert(format!("{}{}", prefix_str, key), serde_json::json!(v));

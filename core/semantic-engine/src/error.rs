@@ -19,8 +19,8 @@ pub enum SemanticEngineError {
     #[error("Write resolution failed: {0}")]
     WriteResolve(#[from] anidb_write_resolver::ResolveError),
 
-    #[error("Anthropic API error: {0}")]
-    Anthropic(#[from] crate::anthropic::AnthropicError),
+    #[error("LLM provider error: {0}")]
+    Llm(#[from] crate::llm::LlmError),
 
     #[error("Service client error: {0}")]
     Client(#[from] crate::clients::ClientError),

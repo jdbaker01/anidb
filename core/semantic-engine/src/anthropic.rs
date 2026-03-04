@@ -8,6 +8,8 @@
 use reqwest::header::{HeaderMap, HeaderValue, CONTENT_TYPE};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
+use crate::llm::{LlmError, LlmRequest};
+
 // ============================================================================
 // Client
 // ============================================================================
@@ -72,36 +74,71 @@ impl AnthropicClient {
         Ok(response)
     }
 
-    /// Send a request that forces a tool_use response, then deserialize
-    /// the tool input as type T.
+    /// Send a provider-agnostic LlmRequest and return structured output as T.
     pub async fn send_structured<T: DeserializeOwned>(
         &self,
-        request: MessageRequest,
-    ) -> Result<T, AnthropicError> {
-        let response = self.send(request).await?;
+        req: LlmRequest,
+    ) -> Result<T, LlmError> {
+        let tool = req.tool.ok_or(LlmError::NoStructuredOutput)?;
 
-        // Find the tool_use content block
+        let request = MessageRequest {
+            model: self.model.clone(),
+            max_tokens: req.max_tokens,
+            system: req.system,
+            messages: req
+                .messages
+                .into_iter()
+                .map(|m| Message {
+                    role: m.role,
+                    content: MessageContent::Text(m.content),
+                })
+                .collect(),
+            tools: Some(vec![ToolDef {
+                name: tool.name.clone(),
+                description: tool.description,
+                input_schema: tool.input_schema,
+            }]),
+            tool_choice: Some(ToolChoice {
+                choice_type: "tool".to_string(),
+                name: tool.name,
+            }),
+        };
+
+        let response = self.send(request).await.map_err(LlmError::from)?;
         for block in &response.content {
             if let ContentBlock::ToolUse { input, .. } = block {
                 let value: T = serde_json::from_value(input.clone())?;
                 return Ok(value);
             }
         }
-
-        Err(AnthropicError::NoToolUse)
+        Err(LlmError::NoStructuredOutput)
     }
 
-    /// Send a request and extract the first text block.
-    pub async fn send_text(&self, request: MessageRequest) -> Result<String, AnthropicError> {
-        let response = self.send(request).await?;
+    /// Send a provider-agnostic LlmRequest and return plain text.
+    pub async fn send_text(&self, req: LlmRequest) -> Result<String, LlmError> {
+        let request = MessageRequest {
+            model: self.model.clone(),
+            max_tokens: req.max_tokens,
+            system: req.system,
+            messages: req
+                .messages
+                .into_iter()
+                .map(|m| Message {
+                    role: m.role,
+                    content: MessageContent::Text(m.content),
+                })
+                .collect(),
+            tools: None,
+            tool_choice: None,
+        };
 
+        let response = self.send(request).await.map_err(LlmError::from)?;
         for block in &response.content {
             if let ContentBlock::Text { text } = block {
                 return Ok(text.clone());
             }
         }
-
-        Err(AnthropicError::NoText)
+        Err(LlmError::NoText)
     }
 }
 
@@ -211,6 +248,22 @@ pub enum AnthropicError {
 impl std::fmt::Display for AnthropicClient {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "AnthropicClient(model={}, base_url={})", self.model, self.base_url)
+    }
+}
+
+// ============================================================================
+// Error conversion
+// ============================================================================
+
+impl From<AnthropicError> for LlmError {
+    fn from(err: AnthropicError) -> Self {
+        match err {
+            AnthropicError::Http(e) => LlmError::Http(e),
+            AnthropicError::Api { status, body } => LlmError::Api { status, body },
+            AnthropicError::Deserialization(e) => LlmError::Deserialization(e),
+            AnthropicError::NoToolUse => LlmError::NoStructuredOutput,
+            AnthropicError::NoText => LlmError::NoText,
+        }
     }
 }
 

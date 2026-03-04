@@ -3,5 +3,7 @@ pub mod clients;
 pub mod config;
 pub mod error;
 pub mod handlers;
+pub mod llm;
+pub mod openai;
 pub mod pipeline;
 pub mod state;
