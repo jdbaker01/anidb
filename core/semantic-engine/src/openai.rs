@@ -110,7 +110,7 @@ impl OpenAIClient {
 
         let body = ChatRequest {
             model: self.model.clone(),
-            max_tokens: req.max_tokens,
+            max_completion_tokens: req.max_tokens,
             messages,
             tools: Some(vec![oai_tool]),
             tool_choice: Some(serde_json::json!({
@@ -166,7 +166,7 @@ impl OpenAIClient {
 
         let body = ChatRequest {
             model: self.model.clone(),
-            max_tokens: req.max_tokens,
+            max_completion_tokens: req.max_tokens,
             messages,
             tools: None,
             tool_choice: None,
@@ -196,7 +196,7 @@ impl OpenAIClient {
 #[derive(Debug, Clone, Serialize)]
 struct ChatRequest {
     model: String,
-    max_tokens: u32,
+    max_completion_tokens: u32,
     messages: Vec<ChatMessage>,
     #[serde(skip_serializing_if = "Option::is_none")]
     tools: Option<Vec<ChatTool>>,
@@ -266,7 +266,7 @@ mod tests {
     fn chat_request_serializes_without_tools() {
         let req = ChatRequest {
             model: "gpt-4o".to_string(),
-            max_tokens: 1024,
+            max_completion_tokens: 1024,
             messages: vec![ChatMessage {
                 role: "user".to_string(),
                 content: Some("Hello".to_string()),
@@ -286,7 +286,7 @@ mod tests {
     fn chat_request_serializes_with_tools() {
         let req = ChatRequest {
             model: "gpt-4o".to_string(),
-            max_tokens: 1024,
+            max_completion_tokens: 1024,
             messages: vec![ChatMessage {
                 role: "system".to_string(),
                 content: Some("You are a parser.".to_string()),
