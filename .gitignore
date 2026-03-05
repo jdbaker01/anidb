@@ -38,6 +38,8 @@ Thumbs.db
 
 # Experiment results (regenerable)
 experiments/results/
+experiments/*/results/
+experiments/*/data/
 
 # Docker volumes
 infra/neo4j/data/
