@@ -183,7 +183,7 @@ impl ConfidenceStoreClient {
         &self,
         entity_type: &str,
     ) -> Result<Vec<FactRecord>, ClientError> {
-        let url = format!("{}/entity-type/{}/facts", self.base_url, entity_type);
+        let url = format!("{}/facts/type/{}", self.base_url, entity_type);
         let resp = self.http.get(&url).send().await?;
 
         let status = resp.status().as_u16();
